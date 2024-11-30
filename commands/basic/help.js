@@ -135,7 +135,7 @@ module.exports = {
 
                     switch (category) {
                         case 'anime':
-                            page.image = "https://cdn.discordapp.com/attachments/1246408947708072027/1253714802048499752/1111.gif?ex=6676dc65&is=66758ae5&hm=9bc3f45ed4930d62def2369c6a27fdd65f24df0fdbe557a7ff7d330090eac1bf&";
+                            page.image = "https://cdn.discordapp.com/attachments/1309556699388055572/1312460974632210495/M2k5r3H.gif?ex=674c9408&is=674b4288&hm=c1146500374aec6228369c48ff749612e70ab128cb71080ec89390c81a17caef&";
                             page.color = "#ff66cc";
                             page.thumbnail = "https://cdn.discordapp.com/attachments/1264134884432285766/1270353776489922651/s_removed.png?ex=66b364a6&is=66b21326&hm=2d4ded259b57f476c901c58401e1d6faba2653c0a964ee1c4f371ecf3da52100&";
                             page.author.iconURL = "https://cdn.discordapp.com/attachments/1246408947708072027/1255167194036437093/1558-zerotwo-exciteddance.gif?ex=667c250a&is=667ad38a&hm=09e6db36fd79436eb57de466589f21ca947329edd69b8e591d0f6586b89df296&";
