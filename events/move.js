@@ -1,40 +1,54 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('move')
-        .setDescription('Moves a song to a new position in the queue.')
-        .addIntegerOption(option => 
-            option.setName('current')
-                .setDescription('The current position of the song')
-                .setRequired(true))
-        .addIntegerOption(option => 
-            option.setName('new')
-                .setDescription('The new position for the song')
-                .setRequired(true)),
-    
+        .setDescription('Move a user to another voice channel.')
+        .addUserOption(option =>
+            option
+                .setName('target')
+                .setDescription('The user to move.')
+                .setRequired(true)
+        )
+        .addChannelOption(option =>
+            option
+                .setName('destination')
+                .setDescription('The voice channel to move the user to.')
+                .setRequired(true)
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers), // Restrict command to users with Move Members permission
     async execute(interaction) {
-        const current = interaction.options.getInteger('current') - 1; // Convert to zero-based index
-        const newPosition = interaction.options.getInteger('new') - 1;
+        const targetUser = interaction.options.getUser('target');
+        const destinationChannel = interaction.options.getChannel('destination');
+        const member = interaction.guild.members.cache.get(targetUser.id);
 
-        // Get the guild's queue (Replace with your queue management system)
-        const queue = interaction.client.queues.get(interaction.guild.id);
-
-        if (!queue || queue.length === 0) {
-            return interaction.reply({ content: 'The queue is empty!', ephemeral: true });
+        // Check if the destination is a voice channel
+        if (!destinationChannel.isVoice()) {
+            return interaction.reply({ content: 'The destination must be a voice channel!', ephemeral: true });
         }
 
-        // Validate positions
-        if (current < 0 || current >= queue.length || newPosition < 0 || newPosition >= queue.length) {
-            return interaction.reply({ content: 'Invalid positions provided!', ephemeral: true });
+        // Check if the member has the "Move Power" role
+        const movePowerRole = interaction.guild.roles.cache.find(role => role.name === 'Move Power');
+        if (!movePowerRole) {
+            return interaction.reply({ content: 'The "Move Power" role does not exist.', ephemeral: true });
         }
 
-        // Move the song
-        const [movedSong] = queue.splice(current, 1); // Remove the song
-        queue.splice(newPosition, 0, movedSong); // Insert at new position
+        if (!member.roles.cache.has(movePowerRole.id)) {
+            return interaction.reply({ content: `${targetUser.username} does not have the "Move Power" role!`, ephemeral: true });
+        }
 
-        interaction.reply({
-            content: `Moved **${movedSong.title}** from position ${current + 1} to ${newPosition + 1}. 🎵`,
-        });
+        // Check if the user is in a voice channel
+        if (!member.voice.channel) {
+            return interaction.reply({ content: `${targetUser.username} is not in a voice channel!`, ephemeral: true });
+        }
+
+        // Move the user
+        try {
+            await member.voice.setChannel(destinationChannel);
+            interaction.reply({ content: `Moved ${targetUser.username} to ${destinationChannel.name}. 🎉` });
+        } catch (error) {
+            console.error(error);
+            interaction.reply({ content: 'An error occurred while trying to move the user.', ephemeral: true });
+        }
     },
 };
